@@ -7,3 +7,22 @@ test('unauthorised edits are rejected by the model',()=>{const m=setup();assert.
 test('booking clears appointment wait; task completion and notes persist',()=>{const m=setup();const c=m.get().cases.find(c=>c.studentId==='riya');m.mutate('appointment',{id:c.id,date:new Date(Date.now()+86400000).toISOString()},'counsellor');m.mutate('task',{id:'t-5',done:true},'counsellor');m.mutate('note',{studentId:'riya',department:'wellbeing',text:'Private demo check-in',restricted:true},'counsellor');m.reload();const d=m.get('counsellor');assert.equal(m.flags(d.students.find(s=>s.id==='riya'),d).flags.length,0);assert.equal(d.tasks.find(t=>t.id==='t-5').done,true);assert.ok(!JSON.stringify(m.get('fees')).includes('Private demo check-in'));});
 test('offline intake produces connected records and matching department tasks',()=>{const m=setup();const text='I need help with my fees, scholarship and missed classes.';const result=m.intake(text);assert.deepEqual(Array.from(result.departments),['fees','scholarships','academics']);const ids=m.mutate('intake',{...result,text,studentId:'simran'},'coordinator');const d=m.get(),cases=d.cases.filter(c=>ids.includes(c.id));assert.equal(cases.length,3);assert.equal(new Set(cases.map(c=>c.journeyId)).size,1);assert.equal(d.tasks.filter(t=>ids.includes(t.caseId)).length,3);m.reset();assert.equal(m.get().cases.length,21);assert.equal(m.get().students.find(s=>s.id==='aanya').hold,false);});
 test('mixed-department intake does not disclose sensitive original text to Fees',()=>{const m=setup(),text='I have low mood and cannot pay my fees.';m.mutate('intake',{...m.intake(text),text,studentId:'aanya'},'coordinator');assert.ok(!JSON.stringify(m.get('fees')).includes(text));assert.ok(JSON.stringify(m.get('counsellor')).includes(text));});
+test('a student can add another grievance and track it without exposing it to other teams',()=>{
+ const m=setup(),text='The hostel study-room light still needs a repair. Please share an update.';
+ const id=m.mutate('studentGrievance',{title:'Study-room maintenance follow-up',text},'student');
+ m.mutate('studentGrievance',{title:'Another campus concern',text:'Please review the unresolved library access request.'},'student');
+ m.reload();
+ const own=m.get('student');assert.equal(own.cases.filter(c=>c.studentSubmitted).length,2);assert.equal(own.cases.find(c=>c.id===id).originalRequest,text);assert.ok(own.events.some(e=>e.caseId===id));
+ assert.ok(m.get('grievance').cases.some(c=>c.id===id));
+ for(const role of ['coordinator','fees','counsellor','hostel','academics','placement'])assert.ok(!JSON.stringify(m.get(role)).includes(id),role);
+ const task=m.get('grievance').tasks.find(t=>t.caseId===id);assert.ok(task);assert.ok(!own.tasks.some(t=>t.id===task.id));assert.throws(()=>m.mutate('task',{id:task.id,done:true},'coordinator'));
+ m.mutate('status',{id,status:'In progress'},'grievance');assert.equal(m.get('student').cases.find(c=>c.id===id).status,'In progress');
+ m.mutate('note',{studentId:'aanya',department:'grievance',text:'Internal grievance review note',restricted:true},'grievance');assert.ok(!JSON.stringify(m.get('student')).includes('Internal grievance review note'));
+ m.reset();assert.equal(m.get('student').cases.filter(c=>c.studentSubmitted).length,0);
+});
+test('student grievance submissions validate ownership and content before changing records',()=>{
+ const m=setup(),before=m.get('grievance').cases.length;
+ for(const payload of [{title:'Valid title',text:'too short'},{title:'x',text:'A sufficiently detailed concern.'},{title:'Valid title',text:'A sufficiently detailed concern.',studentId:'neha'},{title:'Valid title',text:'x'.repeat(3001)}])assert.throws(()=>m.mutate('studentGrievance',payload,'student'));
+ assert.throws(()=>m.mutate('studentGrievance',{title:'Valid title',text:'A sufficiently detailed concern.'},'coordinator'));
+ assert.equal(m.get('grievance').cases.length,before);
+});

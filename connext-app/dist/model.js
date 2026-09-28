@@ -10,7 +10,7 @@ window.ConnextModel = (()=>{
   const days=date=>Math.max(0,Math.floor((Date.now()-new Date(date))/86400000));
   const uid=prefix=>`${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
   function save(){try{localStorage.setItem(config.storageKey,JSON.stringify(state));}catch{window.dispatchEvent(new Event('connext-storage-error'));}window.dispatchEvent(new Event('connext-change'));}
-  function permission(record,role){if(role==='student')return record.studentId==='aanya'&&record.sensitivity!=='restricted'?'full':'hidden';if(record.sensitivity!=='restricted')return 'full';if(record.restrictedTo?.includes(role))return 'full';return record.hideExistence?'hidden':'redacted';}
+  function permission(record,role){if(role==='student')return record.studentId==='aanya'&&(record.sensitivity!=='restricted'||record.department==='grievance'&&record.studentSubmitted===true)?'full':'hidden';if(record.sensitivity!=='restricted')return 'full';if(record.restrictedTo?.includes(role))return 'full';return record.hideExistence?'hidden':'redacted';}
   function visible(record,role){const access=permission(record,role);if(access==='hidden')return null;const copy=clone(record);copy.access=access;if(copy.originalRequest&&copy.journeyId&&state.cases.some(c=>c.journeyId===copy.journeyId&&c.sensitivity==='restricted'&&!c.restrictedTo?.includes(role)))copy.originalRequest='Intake contains restricted support context. Contact Student Support for the shared operational brief.';if(access==='redacted'){delete copy.privateNote;delete copy.originalRequest;copy.summary=record.department==='wellbeing'?'Wellbeing support — details restricted':'Restricted department support';if('text' in copy)copy.text='Restricted to Counselling';if('brief' in copy)copy.brief='Context restricted to the receiving team.';}return copy;}
   function get(role='coordinator'){
     const result=clone(state);
@@ -33,9 +33,23 @@ window.ConnextModel = (()=>{
   function canEdit(record,role){return role==='coordinator'||state.roles.find(r=>r.id===role)?.department===record.department;}
   function assert(ok,message='This action belongs to another department.'){if(!ok)throw new Error(message);}
   function mutate(action,payload,role){
-    assert(role!=='student','Student demo is read-only.');
+    assert(role!=='student'||action==='studentGrievance','Students can submit their own grievance but cannot change staff records.');
+    if(action==='studentGrievance'){
+      assert(role==='student','Use the student demo to submit a grievance.');
+      assert(!payload.studentId||payload.studentId==='aanya','You can only submit a grievance for your own demo account.');
+      const title=typeof payload.title==='string'?payload.title.trim():'';
+      const text=typeof payload.text==='string'?payload.text.trim():'';
+      assert(title.length>=3&&title.length<=120,'Add a title between 3 and 120 characters.');
+      assert(text.length>=10&&text.length<=3000,'Describe your concern in 10 to 3,000 characters.');
+      const id=uid('GRV'),studentId='aanya',department='grievance';
+      const privacy={sensitivity:'restricted',restrictedTo:['grievance'],hideExistence:true};
+      state.cases.push({id,studentId,department,summary:title,originalRequest:text,openedAt:new Date().toISOString(),status:'Pending',owner:state.departments.find(d=>d.id===department).initials,studentSubmitted:true,...privacy});
+      state.tasks.push({id:uid('t'),studentId,caseId:id,department,title:'Review student grievance and acknowledge receipt',due:new Date(Date.now()+2*86400000).toISOString(),done:false,...privacy});
+      append(studentId,department,'created','Student submitted a grievance for review.',role,{caseId:id,studentSubmitted:true,...privacy});
+      save();return id;
+    }
     if(action==='status'){const c=state.cases.find(c=>c.id===payload.id);assert(c&&permission(c,role)!=='hidden'&&canEdit(c,role));assert(['Pending','In progress','Waiting on student','Resolved'].includes(payload.status));c.status=payload.status;append(c.studentId,c.department,'status',`${c.id} changed to ${c.status}.`,role,{caseId:c.id});}
-    if(action==='task'){const t=state.tasks.find(t=>t.id===payload.id);assert(t&&canEdit(t,role));t.done=!!payload.done;append(t.studentId,t.department,'task',`${t.done?'Completed':'Reopened'} task: ${t.title}`,role,{caseId:t.caseId});}
+    if(action==='task'){const t=state.tasks.find(t=>t.id===payload.id);assert(t&&permission(t,role)==='full'&&canEdit(t,role));t.done=!!payload.done;append(t.studentId,t.department,'task',`${t.done?'Completed':'Reopened'} task: ${t.title}`,role,{caseId:t.caseId});}
     if(action==='note'){assert(payload.text?.trim(),'Enter a note.');const dept=payload.department||state.roles.find(r=>r.id===role).department;assert(role==='coordinator'||state.roles.find(r=>r.id===role).department===dept);const restricted=payload.restricted===true;assert(!restricted||['counsellor','grievance'].includes(role),'Only authorised departments can add restricted notes.');append(payload.studentId,dept,'note',payload.text.trim(),role,restricted?{sensitivity:'restricted',restrictedTo:[role],hideExistence:role==='grievance'}:{});}
     if(action==='addTask'){assert(payload.title?.trim(),'Enter a task.');assert(role==='coordinator'||state.roles.find(r=>r.id===role).department===payload.department);state.tasks.push({id:uid('t'),studentId:payload.studentId,title:payload.title.trim(),department:payload.department,due:new Date(payload.due+'T12:00:00').toISOString(),done:false});append(payload.studentId,payload.department,'task',`Created task: ${payload.title.trim()}`,role);}
     if(action==='hold'){assert(['coordinator','fees'].includes(role));const s=state.students.find(s=>s.id===payload.studentId);s.hold=!s.hold;append(s.id,'fees','hold',s.hold?'Coordinated hold enabled. Pause reminders and contact Student Support.':'Coordinated hold released. Fee reminders may resume.',role);}

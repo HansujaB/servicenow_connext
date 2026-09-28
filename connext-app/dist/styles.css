@@ -5,3 +5,23 @@
 @media(max-width:1050px){.overview-grid{grid-template-columns:1fr}.side-stack{display:grid;grid-template-columns:1fr 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.page-heading{align-items:flex-start}.heading-actions{flex-wrap:wrap;justify-content:flex-end}.overview-bottom,.insights-grid{grid-template-columns:1fr 1fr}.profile-detail-grid{grid-template-columns:1fr}.profile-detail-grid>.side-stack{display:block}.profile-detail-grid>.side-stack>.card{margin-bottom:18px}}
 @media(max-width:760px){.app-shell{padding-left:0}.sidebar{transform:translateX(-100%);transition:.2s;width:236px;box-shadow:15px 0 50px #12352f20}.sidebar.open{transform:translateX(0)}.mobile-toggle{display:flex}.topbar{height:68px;padding:0 16px;gap:12px}.breadcrumbs{display:none}.profile-control{padding-left:10px}.profile-name{font-size:12px}.main{padding:22px 17px}.page-heading{display:block;margin-bottom:20px}h1{font-size:26px}.heading-actions{justify-content:flex-start;margin-top:17px}.demo-notice{font-size:10px;align-items:flex-start;line-height:1.6}.demo-notice a{display:none}.metrics{gap:10px;margin-bottom:20px}.metric{padding:16px 14px}.metric-top{font-size:11px}.metric-value{font-size:29px}.metric-bottom{font-size:10px}.side-stack,.overview-bottom,.insights-grid,.knowledge-grid{grid-template-columns:1fr}.card-head{padding:18px}.filters{padding-left:18px;padding-right:18px}.student-grid,.departments-grid{grid-template-columns:1fr}.profile-banner{flex-wrap:wrap;padding:20px}.profile-banner h1{font-size:22px}.profile-banner .button-group{width:100%}.page-footer{font-size:9px}.handoff-card{grid-template-columns:1fr}.handoff-journey{flex-wrap:wrap}.form-row,.record-grid{grid-template-columns:1fr}.hold-banner{flex-direction:column;align-items:flex-start}.tabs{gap:16px;overflow:auto;white-space:nowrap}.modal-header{padding:18px}.modal-body{padding:18px}#toast{left:50%;width:max-content}.table-wrap th,.table-wrap td{padding:13px 14px}.role-picker{max-width:140px}.brand-footer{margin-top:15px}.case-item{flex-wrap:wrap}.case-item .filter-select{margin-left:47px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.student-grievance-prompt{display:flex;align-items:flex-start;gap:17px;padding:23px 25px;border:1px solid #d9e4cc;background:#eaf1df;border-radius:12px;margin-bottom:23px}
+.student-grievance-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex-shrink:0;background:#dce9cc;border-radius:10px;color:#657f50}
+.student-grievance-prompt h2{font-size:17px;line-height:1.5;margin-bottom:7px}
+.student-grievance-prompt p{font-size:13px;line-height:1.7;color:#7a896e;margin-bottom:16px}
+.student-grievance-prompt .button-group{flex-wrap:wrap}
+.student-support-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start}
+.student-support-grid .student-status{max-width:none}
+.student-grievances .card-description{max-width:290px}
+.student-grievance-record{border-top:1px solid var(--line);padding:18px 22px}
+.student-grievance-record summary{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;cursor:pointer;font-size:14px;font-weight:600;line-height:1.6;list-style:none}
+.student-grievance-record summary::-webkit-details-marker{display:none}
+.student-grievance-record summary>span:first-child:before{content:'+';display:inline-block;width:16px;color:#82946e;font-weight:400}
+.student-grievance-record[open] summary>span:first-child:before{content:'−'}
+.student-grievance-record summary:focus-visible{outline:3px solid #6fa57a;outline-offset:5px;border-radius:4px}
+.student-grievance-content p{font-size:14px;line-height:1.8;color:#74826c;white-space:pre-wrap;overflow-wrap:anywhere;margin:14px 0}
+.student-grievance-content .small-meta{overflow-wrap:anywhere}
+.grievance-input-options{flex-wrap:wrap}
+.grievance-voice-status{font-size:12px;line-height:1.7;color:#647d54;background:#f0f5e9;padding:11px 13px;border-radius:7px;margin:14px 0}
+@media(max-width:1100px){.student-support-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.student-grievance-prompt{padding:19px;gap:12px}.student-grievance-icon{width:33px;height:33px}.student-grievance-prompt h2{font-size:15px}.student-grievance-prompt .btn{font-size:11px}.student-grievance-record{padding:17px 19px}}

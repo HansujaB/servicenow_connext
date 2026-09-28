@@ -16,11 +16,13 @@ Open http://127.0.0.1:4173. Run commands from this folder. Optional visual fonts
 
 ## Included
 
+- A responsive home page at `#home`, opened by clicking the Connext logo, with role-aware links back into the workspace.
 - Overview, urgency-ranked attention queue, live search, department/priority filters and sorting.
 - Ten fictional student stories; all twelve departments named; seven primary departments seeded, plus optional Accessibility and Grievance cases.
 - Student 360, connected cases, append-only shared timeline, department-specific student database lookup and next-step tasks.
 - Configurable detector rules with a visible reason for every flag. Ishita's combined signals and Aanya's priority journey are deliberate demo stories.
-- Eight demo roles, full/redacted/hidden view filtering, restricted counselling notes, hidden grievance records and a minimal student shell.
+- Eight demo roles, full/redacted/hidden view filtering, restricted counselling notes and hidden grievance records.
+- Student grievance submission by text, optional browser voice dictation or an editable demo example, with local persistence and status tracking. Students can see their own submissions; staff access is restricted to the Grievance Officer.
 - Offline text intake, deterministic routing and task creation, review before creation, related-case warnings and optional browser speech recognition.
 - Permission-filtered simulated case briefs, department summaries, daily briefing and a local case copilot.
 - Notes, status updates, task completion, follow-up dates and first-appointment booking.
@@ -57,4 +59,4 @@ The permission layer strips restricted fields before UI and simulated-AI renderi
 
 Changes synchronise only across tabs on the same device/browser/origin, not across users or devices. Separate tabs can overwrite simultaneous edits. Reset is intentionally a one-click operation on fictional local data.
 
-Nine automated checks pass. Visual browser QA and browser WebMCP validation were unavailable because the browser approval service timed out. The page includes optional feature-detected WebMCP tools; ordinary browsers do not need them.
+Eleven automated checks cover workflows, permission filtering and page rendering. The home page and student grievance submission were also verified in the browser, including saving a demo grievance and displaying its Pending status. Live microphone capture was not exercised; it depends on browser support and permission. The page includes optional feature-detected WebMCP tools; ordinary browsers do not need them.
