@@ -1,0 +1,11 @@
+{
+  "name": "connext-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Fictional joined-up student support frontend",
+  "scripts": {
+    "dev": "node connext-app/server.cjs",
+    "start": "node connext-app/server.cjs",
+    "test": "node --test connext-app/tests/model.test.cjs connext-app/tests/render.test.cjs"
+  }
+}

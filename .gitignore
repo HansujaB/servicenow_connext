@@ -1,0 +1,6 @@
+node_modules/
+connext-app/.sites-runtime/
+connext-app/.openai/
+*.tar.gz
+*.log
+.DS_Store
